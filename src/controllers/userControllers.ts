@@ -14,17 +14,17 @@ export const getAllUser = async (request: Request, response: Response) => {
     try {
         const { search } = request.query
         const allUser = await prisma.user.findMany({
-            where: { name: { contains: search?.toString() || ""}}
+            where: { username: { contains: search?.toString() || ""}}
         })
         return response.json({
             status: true,
             data: allUser,
-            message: 'Iki isi user e cah'
+            message: 'Ini di isi user e'
         }).status(200)
     } catch (error) {
         return response.json({
             status: false,
-            message: `Error sam. $(error)`
+            message: `Error Bro $(error)`
         })
         .status(400)
     }
@@ -32,23 +32,23 @@ export const getAllUser = async (request: Request, response: Response) => {
 
 export const createUser = async (request: Request, response: Response) => {
     try {
-        const { name, email, password, Role } = request.body
+        const { username, password, role} = request.body
         const uuid = uuidv4()
 
         const newUser = await prisma.user.create({ 
-            data: { uuid, name, email, password: md5(password), Role}
+            data: { uuid, username,password: md5(password), role}
         })
         return response.json({
             Status: true,
             data: newUser,
-            massage: `Berhasil cah`
+            massage: `Berhasil Bro`
         }).status(200);
     }
     catch (eror) {
         return response
             .json({
                 status: false,
-                massage: `Eror iii. ${eror}`
+                massage: `Username Sudah Digunakan`
             }).status(400);
     }
 }
@@ -56,8 +56,8 @@ export const createUser = async (request: Request, response: Response) => {
 export const updateUser = async (request: Request,  response: Response) => {
     try {
         const { id } = request.params
-        const { name,  email, password, Role } = request.body
-
+        const { username, password,} = request.body
+        
         const findUser = await prisma.user.findFirst({ where: { id: Number(id) } })
         if  (!findUser) return response
         .status(200)
@@ -65,10 +65,8 @@ export const updateUser = async (request: Request,  response: Response) => {
         
         const  updateUser = await prisma.user.update({
             data: {
-                name: name ||  findUser.name,
-                email: email || findUser.email,
+                username: username ||  findUser.username,
                 password: md5(password) || findUser.password,
-                Role: Role ||  findUser.Role
             },
             where: { id: Number(id) }
         }) 
@@ -76,57 +74,24 @@ export const updateUser = async (request: Request,  response: Response) => {
         return response.json({
             status: true,
             data: updateUser,
-            message: `Menu has updated`
+            message: `User has updated`
         }).status(200)
     } catch (error) {
         return response
         .json({
             status: false,
-            message: `There is an error.${error}`
+            message: `There is an error. ${error}`
         })
         .status(400)
     }
 }
 
-export const changePictureProf = async (request: Request, response: Response) => {
-    try {
-        const { id } = request.params;
-
-        const findUser = await prisma.user.findFirst({ where: { id: Number(id) } });
-        if (!findUser) return response.status(404).json({ status: false, message: `User not found `});
-
-        let filename = findUser.profile_picture;
-        if (request.file) {
-            filename = request.file.filename;
-
-            const oldFilePath =`${BASE_URL}/../public/profil_picture/${findUser.profile_picture}`;
-            const fileExists = fs.existsSync(oldFilePath);
-            if (fileExists && findUser.profile_picture !== "") fs.unlinkSync(oldFilePath);
-        }
-
-        const updateUser = await prisma.user.update({
-            data: { profile_picture: filename },
-            where: { id: Number(id) }
-        })
-
-        return response.status(200).json({
-            status: true,
-            data: updateUser,
-            message: `Profile picture has been changed`
-        })
-    } catch (error) {
-        return response.status(400).json({
-            status: false,
-            message: `There was an error. ${error}`
-        })
-    }
-}
 export const deleteUser = async (request: Request, response: Response) => {
         try {
             const { id } = request.params;
     
             const findUser = await prisma.user.findFirst({ where: { id: Number(id) } });
-            if (!findUser) return response.status(404).json({ status: false, message: `User not found` });
+            if (!findUser) return response.status(404).json({ status: false, message: `User Sudah Dihapus` });
     
             await prisma.user.delete({ where: { id: Number(id) } });
     
@@ -144,26 +109,26 @@ export const deleteUser = async (request: Request, response: Response) => {
 
 export const authentication = async (request: Request, response: Response) => {
     try {
-        const { email, password } = request.body;
+      const { username, password } = request.body;
 
-        const findUser = await prisma.user.findFirst({
-            where: { email, password: md5(password) },
-        });
+      const findUser = await prisma.user.findFirst({
+        where: { username, password: md5(password) },
+      });
 
         if (!findUser) {
             return response.status(200).json({
                 status: false,
                 loged: false,
-                message: `Email or Password is invalid`
+                message: `Username or Password is invalid`
             });
 
             
         }
         let data = {
+            password: findUser.password,
             id: findUser.id,
-            email: findUser.email,
-            name: findUser.name,
-            Role: findUser.Role,
+            username: findUser.username,
+            role: findUser.role,
         };
 
         let payload = JSON.stringify(data);

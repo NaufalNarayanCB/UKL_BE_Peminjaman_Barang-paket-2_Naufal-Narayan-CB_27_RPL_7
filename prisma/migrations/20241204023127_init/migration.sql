@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE `item` ADD COLUMN `uuid` VARCHAR(191) NOT NULL DEFAULT '';
+
+-- AlterTable
+ALTER TABLE `peminjaman` ADD COLUMN `uuid` VARCHAR(191) NOT NULL DEFAULT '';

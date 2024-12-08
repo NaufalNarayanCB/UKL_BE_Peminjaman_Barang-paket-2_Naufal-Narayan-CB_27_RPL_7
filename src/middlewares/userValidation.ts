@@ -3,24 +3,20 @@ import { request } from "http";
 import Joi from "joi";
 
 const authSchema = Joi.object({
-    email: Joi.string().email().required(),
+    username: Joi.string().required(),
     password: Joi.string().min(3).alphanum().required(),
 });
 
-const addDataSchema = Joi.object({
-    name: Joi.string().required(),
-    email: Joi.string().required(),
+const addDataSchema = Joi.object({ 
+    username: Joi.string().required(),
     password: Joi.string().min(3).required(),
-    role: Joi.string().valid('CASHIER', 'MANAGER',).required(), 
-    profile_picture: Joi.allow().optional() 
+    role: Joi.allow().valid('ADMIN','USER').required(), 
 })
 
 const editDataSchema = Joi.object({
-    name: Joi.string().optional(),
-    email: Joi.string().optional(),
+    username: Joi.string().optional(),
     password: Joi.string().min(3).optional(),
-    role: Joi.string().valid('CASHIER', 'MANAGER',).optional(),
-    profile_picture: Joi.allow().optional()
+    role: Joi.allow().optional(),
 })
 
 export const verifyAuthentication = (
@@ -43,7 +39,6 @@ export const verifyAddUser = (
     response: Response,
     next: NextFunction
 ) => {
-    //beh
     const {error} = addDataSchema.validate(request.body, {abortEarly: false});
     if(error) {
         return response.status(400).json({
@@ -58,7 +53,6 @@ export const verifyEditUser = (
     response: Response,
     next: NextFunction
 ) => {
-    //beh
     const {error} = editDataSchema.validate(request.body, {abortEarly: false});
     if(error) {
         return response.status(400).json({

@@ -6,8 +6,8 @@ import { decode } from "punycode";
 
 interface JwtPayLoad {
     id: string;
-    name: string;
-    email: string;
+    username: string;
+    password: string;
     role: string;
 }
 
@@ -36,10 +36,9 @@ export const verifyRole = (allowedRoles: string[]) => {
             return res.status(403).json({ message: 'No user information available.' });
         }
 
-        if (!allowedRoles.includes(user.Role)) {
+        if (!allowedRoles.includes(user.role)) {
             return res.status(403)
-            .json({ message: `Access denied.
-                Requires one of the following roles: ${allowedRoles.join(', ')}` });
+            .json({ message: `Access denied. Requires one of the following roles: ${allowedRoles.join(', ')}` });
         }
 
         next()
